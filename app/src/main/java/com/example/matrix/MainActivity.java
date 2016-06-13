@@ -23,7 +23,9 @@ public class MainActivity extends AppCompatActivity {
 
    private ImageView mImageView2;
 
-   private RectF imageBounds;
+   private RectF image1Bounds;
+
+   private RectF image2Bounds;
 
    private RectF imageView1Bounds;
 
@@ -34,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
 
-      imageBounds = new RectF();
+      image1Bounds = new RectF();
+      image2Bounds = new RectF();
       imageView1Bounds = new RectF();
       imageView2Bounds = new RectF();
 
@@ -58,15 +61,17 @@ public class MainActivity extends AppCompatActivity {
 
                // Create a rectangle that is the size of the image.
                Drawable drawable = mImageView1.getDrawable();
-               imageBounds.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+               image1Bounds.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+               drawable = mImageView2.getDrawable();
+               image2Bounds.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
 
                // Create rectangles for the imageviews, separating top and bottom
                imageView1Bounds.set(0, 0, mImageView1.getMeasuredWidth(), mImageView1.getMeasuredHeight() / 2);
                imageView2Bounds.set(0, mImageView1.getMeasuredHeight() / 2, mImageView2.getMeasuredWidth(), mImageView2.getMeasuredHeight());
 
                // set the matrices to transform the images to their respective bounds
-               mMatrix1.setRectToRect(imageBounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
-               mMatrix2.setRectToRect(imageBounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
+               mMatrix1.setRectToRect(image1Bounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
+               mMatrix2.setRectToRect(image2Bounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
 
                mImageView1.setImageMatrix(mMatrix1);
                mImageView2.setImageMatrix(mMatrix2);
@@ -88,8 +93,8 @@ public class MainActivity extends AppCompatActivity {
                   imageView2Bounds.set(0, event.getY(), mImageView2.getMeasuredWidth(), mImageView2.getMeasuredHeight());
 
                   // set the matrices to transform the images to their respective bounds
-                  mMatrix1.setRectToRect(imageBounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
-                  mMatrix2.setRectToRect(imageBounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
+                  mMatrix1.setRectToRect(image1Bounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
+                  mMatrix2.setRectToRect(image2Bounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
 
                   mImageView1.setImageMatrix(mMatrix1);
                   mImageView2.setImageMatrix(mMatrix2);
