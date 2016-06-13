@@ -1,14 +1,14 @@
 package com.example.matrix;
 
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,44 +17,90 @@ public class MainActivity extends AppCompatActivity {
 
    private Matrix mMatrix2;
 
+   private ViewGroup mMainLayout;
+
+   private ImageView mImageView1;
+
+   private ImageView mImageView2;
+
+   private RectF imageBounds;
+
+   private RectF imageView1Bounds;
+
+   private RectF imageView2Bounds;
+
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
 
+      imageBounds = new RectF();
+      imageView1Bounds = new RectF();
+      imageView2Bounds = new RectF();
+
       mMatrix1 = new Matrix();
       mMatrix2 = new Matrix();
 
-   }
-
-   @Override
-   protected void onResume() {
-      super.onResume();
+      mMainLayout = (ViewGroup) findViewById(R.id.main_layout);
 
       // These two image views have the same overlapping coordinates
-      ImageView imageView1 = (ImageView) findViewById(R.id.imageView1);
-      ImageView imageView2 = (ImageView) findViewById(R.id.imageView2);
+      mImageView1 = (ImageView) findViewById(R.id.imageView1);
+      mImageView2 = (ImageView) findViewById(R.id.imageView2);
 
-      imageView1.setImageResource(R.drawable.chrysanthemum);
-      imageView2.setImageResource(R.drawable.chrysanthemum);
+      mMainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+         @Override
+         public void onGlobalLayout() {
 
-      // Create a rectangle that is the size of the image.
-      Drawable drawable = imageView1.getDrawable();
-      RectF imageBounds = new RectF(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+            if (mImageView1.getDrawable() == null) {   // if not initialized
 
-      // Create rectangles for the imageviews, separating top and bottom
-      RectF imageView1Bounds = new RectF(0, 0, imageView1.getMeasuredWidth(), (imageView1.getMeasuredHeight() / 2) - 1);
-      RectF imageView2Bounds = new RectF(0, imageView1.getMeasuredHeight() / 2, imageView2.getMeasuredWidth(), imageView2.getMeasuredHeight());
+               mImageView1.setImageResource(R.drawable.chrysanthemum);
+               mImageView2.setImageResource(R.drawable.chrysanthemum);
 
-      // set the matrices to scale the images to top and bottom
-      mMatrix1.setRectToRect(imageBounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
-      mMatrix2.setRectToRect(imageBounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
+               // Create a rectangle that is the size of the image.
+               Drawable drawable = mImageView1.getDrawable();
+               imageBounds.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
 
-      imageView1.setImageMatrix(mMatrix1);
-      imageView2.setImageMatrix(mMatrix2);
+               // Create rectangles for the imageviews, separating top and bottom
+               imageView1Bounds.set(0, 0, mImageView1.getMeasuredWidth(), mImageView1.getMeasuredHeight() / 2);
+               imageView2Bounds.set(0, mImageView1.getMeasuredHeight() / 2, mImageView2.getMeasuredWidth(), mImageView2.getMeasuredHeight());
 
-      imageView1.setImageResource(R.drawable.chrysanthemum);
-      imageView2.setImageResource(R.drawable.chrysanthemum);
+               // set the matrices to transform the images to their respective bounds
+               mMatrix1.setRectToRect(imageBounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
+               mMatrix2.setRectToRect(imageBounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
+
+               mImageView1.setImageMatrix(mMatrix1);
+               mImageView2.setImageMatrix(mMatrix2);
+            }
+         }
+      });
+
+      mMainLayout.setOnTouchListener(new View.OnTouchListener() {
+         @Override
+         public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+
+               if (event.getY() >= 0F && event.getY() <= mMainLayout.getHeight()) {
+
+                  // use the Y coord of touch event as bottom of imageView1 and top of imageView2
+                  imageView1Bounds.set(0, 0, mImageView1.getMeasuredWidth(), event.getY());
+                  imageView2Bounds.set(0, event.getY(), mImageView2.getMeasuredWidth(), mImageView2.getMeasuredHeight());
+
+                  // set the matrices to transform the images to their respective bounds
+                  mMatrix1.setRectToRect(imageBounds, imageView1Bounds, Matrix.ScaleToFit.FILL);
+                  mMatrix2.setRectToRect(imageBounds, imageView2Bounds, Matrix.ScaleToFit.FILL);
+
+                  mImageView1.setImageMatrix(mMatrix1);
+                  mImageView2.setImageMatrix(mMatrix2);
+
+                  return true;
+               }
+            }
+
+            return false;
+         }
+      });
    }
 
 }
